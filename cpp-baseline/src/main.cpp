@@ -12,7 +12,6 @@ using namespace web::http::experimental::listener;
 
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
     InterruptHandler::hookSIGINT();
 
     auto controller = std::make_unique<HelloController>("http://localhost:8080/hello");
