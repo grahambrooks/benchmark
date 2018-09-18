@@ -4,6 +4,11 @@
 #include <iostream>
 #include "hello_controller.h"
 #include <boost/lexical_cast.hpp>
+#include <algorithm>
+
+static const std::string key = "count";
+
+static const int BUFFER_LENGTH = 1024;
 
 class HelloController {
 protected:
@@ -31,17 +36,19 @@ public:
     void handleGet(const web::http::http_request &message) {
         try {
             auto paths = web::http::uri::split_path(web::http::uri::decode(message.relative_uri().path()));
-            web::json::value response;
-
-
-            if (paths.empty()) {
-                response["hello"] = web::json::value::string("world");
-                message.reply(web::http::status_codes::OK, response);
+            if (paths[0] == "framework") {
+                framework(message);
+            } else if (paths[0] == "benchmark") {
+                auto query = web::http::uri::split_query(message.relative_uri().query());
+                long count = 10000;
+                if (query.count(key) > 0) {
+                    auto it = query.find(key);
+                    if (it != query.end())
+                        count = stol(it->second);
+                }
+                benchmark(message, count);
             } else {
-                response["request"] = web::json::value::string(paths[0]);
-                auto count = boost::lexical_cast<int>(paths[0]);
-                response["fibonacci"] = fibonacci(count);
-                message.reply(web::http::status_codes::OK, response);
+                message.reply(web::http::status_codes::BadRequest);
             }
         }
         catch (std::exception &e) {
@@ -50,21 +57,23 @@ public:
         }
     }
 
-    web::json::value fibonacci(int n) {
-        web::json::value result;
-        int t1 = 0;
-        int t2 = 1;
-        int nextTerm = 0;
-        int index = 0;
+    void framework(const web::http::http_request &message) {
+        web::json::value response;
+        response["hello"] = web::json::value::string("world");
+        message.reply(web::http::status_codes::OK, response);
+    }
 
-        nextTerm = t1 + t2;
-
-        while (nextTerm <= n) {
-            result[index++] = web::json::value::number(nextTerm);
-            t1 = t2;
-            t2 = nextTerm;
-            nextTerm = t1 + t2;
+    void benchmark(const web::http::http_request &message, long count) {
+        std::vector<web::json::value> data;
+        char buffer[BUFFER_LENGTH];
+        for (long i = 0; i < count; i++) {
+            std::snprintf(buffer, BUFFER_LENGTH, "Index %ld", i);
+            data.push_back(web::json::value::string(buffer));
         }
-        return result;
+
+        web::json::value response;
+        data.resize((unsigned long) std::min(10L, count));
+        response["results"] = web::json::value::array(data);
+        message.reply(web::http::status_codes::OK, response);
     }
 };

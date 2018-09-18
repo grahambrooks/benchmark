@@ -14,7 +14,7 @@ using namespace web::http::experimental::listener;
 int main() {
     InterruptHandler::hookSIGINT();
 
-    auto controller = std::make_unique<HelloController>("http://localhost:8080/hello");
+    auto controller = std::make_unique<HelloController>("http://localhost:8080/");
 
     try {
         controller->accept().wait();
