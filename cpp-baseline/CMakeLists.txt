@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 14)
 
+set(PENSSL_ROOT_DIR /usr/local/opt/openssl)
+set(OPENSSL_INCLUDE_DIR /usr/local/opt/openssl/include)
+
 project(cpp-baseline)
 file(GLOB OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
 
