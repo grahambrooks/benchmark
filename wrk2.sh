@@ -6,22 +6,22 @@ function run_benchmark() {
     name=$1
  
     echo Framework $name 1 thread 100 connections 3 minutes with 500 connections
-    wrk2 -t1 -c100 -d3m -R500 --latency http://localhost:8080/framework > data/wrk/$name-framework-t1-c100-d3m-r500.txt
+    wrk2 -t1 -c100 -d1m -R500 --latency http://localhost:8080/framework > data/wrk/$name-framework-t1-c100-d1m-r500.txt
     
     echo Benchmark $name 1 thread 100 connections 3 minutes with 500 connections
-    wrk2 -t1 -c100 -d3m -R500 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t1-c100-d3m-r500.txt
+    wrk2 -t1 -c100 -d1m -R500 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t1-c100-d1m-r500.txt
  
     echo Framework $name 1 thread 100 connections 3 minutes with 1000 connections
-    wrk2 -t1 -c100 -d3m -R1000 --latency http://localhost:8080/framework > data/wrk/$name-framework-t1-c100-d3m-r1000.txt
+    wrk2 -t1 -c100 -d1m -R1000 --latency http://localhost:8080/framework > data/wrk/$name-framework-t1-c100-d1m-r1000.txt
     
     echo Benchmark $name 1 thread 100 connections 3 minutes with 1000 connections
-    wrk2 -t1 -c100 -d3m -R1000 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t1-c100-d3m-r1000.txt
+    wrk2 -t1 -c100 -d1m -R1000 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t1-c100-d1m-r1000.txt
  
     echo Framework $name 4 thread 500 connections 3 minutes with 1000 connections
-    wrk2 -t4 -c500 -d3m -R1000 --latency http://localhost:8080/framework > data/wrk/$name-framework-t4-c500-d3m-r1000.txt
+    wrk2 -t4 -c500 -d1m -R1000 --latency http://localhost:8080/framework > data/wrk/$name-framework-t4-c500-d1m-r1000.txt
     
     echo Benchmark $name 4 thread 500 connections 3 minutes with 1000 connections
-    wrk2 -t4 -c500 -d3m -R1000 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t4-c500-d3m-r1000.txt
+    wrk2 -t4 -c500 -d1m -R1000 --latency http://localhost:8080/benchmark > data/wrk/$name-benchmark-t4-c500-d1m-r1000.txt
 }
  
  
@@ -66,5 +66,15 @@ sleep 5
 run_benchmark cpp
  
 kill -9 $APP_PID
- 
+
+figlet Rust
+rust-benchmark/target/debug/rust-benchmark
+APP_PID=$!
+
+sleep 5
+
+run_benchmark rust
+
+kill -9 $APP_PID
+
 figlet Done!
