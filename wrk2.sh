@@ -77,4 +77,17 @@ run_benchmark rust
 
 kill -9 $APP_PID
 
+figlet Java Spark
+
+cd java-spark
+
+mvn exec:java &
+APP_PID=$!
+
+sleep 3
+
+run_benchmark java-spark
+
+kill -9
+
 figlet Done!
