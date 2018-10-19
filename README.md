@@ -33,21 +33,15 @@ This endpoint creates the specified number of unique strings and then returns th
 
 The idea behind this endpoint is that it simulates some server side processing and resource allocation while still maintaining a very low over the wire transport costs. This can be useful to evaluate the runtime for the chosen language and framework for any jitter in responses due to garbage collection events.
 
-## 
+## Building and running
 
-## cpp-baseline
-C++ / Microsoft cpprestsdk [https://github.com/Microsoft/cpprestsdk]()
-
-Build and Run
-
-    cd cpp-baseline
-    mkdir build
-    cd build
-    cmake -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include ..
     make
-    ./cpp-baseline
 
-## Languages and frameworks
+builds all the examples. For C++ the cpprestsdk and boost are required. The Rust sample requires https://www.rust-lang.org/en-US/ and go requires https://golang.org. You will also need a Java SDK and https://leiningen.org for the clojure example.
+
+The sample data below was generated using https://locust.io which requires python.
+
+## Basic benchmarks
 
 The following results were collected on:
 
@@ -55,7 +49,7 @@ The following results were collected on:
     Processor: 3.5 GHz 6-Core Intel Xeon E5
     Memory: 16 GB 1866 MHz DDR3
 
-The /benchmark enpoint was used with the default 10000 strings being created and returning the first 10 entries
+The /benchmark enpoint was used with the default 10000 strings being created in memory and then returning the first 10 entries
 
 Performance tests were run for 1 minute with 40 concurrent users. Why 40? The cpprestsdk framework has a hard coded thread limit of 40 for it's thread pool so for basic comparisons 40 user connections was used for all the tests below using https://locust.io All times are in ms.
 
