@@ -1,70 +1,44 @@
 #!/bin/bash
 
+make
+
 figlet Java Spring Boot
 
-cd java-spring
-
-mvn spring-boot:run &
+java -jar java-spring/target/java-spring-boot-0.1.0.jar&
 
 APP_PID=$!
-
-cd ..
 
 echo "Spring boot API started as process $APP_PID"
 
-duration=60
-
 sleep 10
 
-
-ab -c 3 -t $duration -g data/benchmark/java-spring-framework.tsv http://localhost:8080/framework
-
-ab -c 3 -t $duration -g data/benchmark/java-spring-benchmark.tsv http://localhost:8080/benchmark
-
-function chart() {
-    title=$1
-    name=$2
-
-    echo "Generating chart data/images/$name.jpg from data/benchmark/$name.tsv"
-    
-    gnuplot -persist <<-EOFMarker
-set terminal jpeg size 500,500
-set size 1, 1
-set output "data/images/$name.jpg"
-set title "$title"
-set key left top
-set grid y
-set xdata time
-set timefmt "%s"
-set format x "%S"
-set xlabel 'seconds'
-set ylabel "response time (ms)"
-set datafile separator '\t'
-plot "data/benchmark/$name.tsv" every ::2 using 2:5 title 'response time' with points
-#plot "data/benchmark/$name.tsv" every ::2 using 2:5 title 'response time' with lines
-EOFMarker
-}
-
-chart "Java Framework test" java-spring-framework
-chart "Java Benchmark test" java-spring-benchmark
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/java-spring-locust.txt
 
 kill -9 $APP_PID
+
+figlet JavaSpark
+
+java -jar java-spark/target/java-spark-1.0-SNAPSHOT.jar&
+APP_PID=$!
+
+sleep 2
+
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/java-spark-locust.txt
+
+kill -9 $APP_PID
+
+sleep 2
 
 figlet GoLang
 
-golang-baseline/service &
+golang-baseline/service&
 APP_PID=$!
 
 sleep 5
-
-ab -c 3 -t $duration -g data/benchmark/golang-framework.tsv http://localhost:8080/framework
-
-ab -c 3 -t $duration -g data/benchmark/golang-benchmark.tsv http://localhost:8080/benchmark
-
-chart "Go Framework test" golang-framework
-chart "Go Benchmark test" golang-benchmark
-
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/golang-locust.txt
 kill -9 $APP_PID
+
+sleep 2
 
 figlet C++
 
@@ -72,13 +46,38 @@ cpp-baseline/build/cpp-baseline &
 APP_PID=$!
 
 sleep 5
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/cpp-locust.txt
+kill -9 $APP_PID
+sleep 2
 
-ab -c 3 -t $duration -g data/benchmark/cpp-framework.tsv http://localhost:8080/framework
+figlet Rust
 
-ab -c 3 -t $duration -g data/benchmark/cpp-benchmark.tsv http://localhost:8080/benchmark
+ROCKET_PORT=8080 ROCKET_LOG=critical rust-benchmark/target/release/rust-benchmark&
+APP_PID=$!
 
-chart "C++ Framework test" cpp-framework
-chart "C++ Benchmark test" cpp-benchmark
+sleep 5
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/rust-locust.txt
+kill -9 $APP_PID
+sleep 2
+figlet Swift Kitura
 
+swift-kitura/.build/x86_64-apple-macosx10.10/release/swift-kitura&
+APP_PID=$!
+
+sleep 5
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/swift-kitura-locust.txt
+kill -9 $APP_PID
+sleep 2
+
+figlet Clojure
+
+cd clojure-benchmark
+lein ring server-headless 8080&
+APP_PID=$!
+cd ..
+
+sleep 15
+locust -f framework-locust.py --host http://localhost:8080 -c 40 -r 40 -t 1m --no-web --only-summary 2> data/benchmark/clojure-locust.txt
 kill -9 $APP_PID
 
+sleep 2
